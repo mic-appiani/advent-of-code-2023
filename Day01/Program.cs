@@ -1,3 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Day01.Part1;
 
-Console.WriteLine("Hello, World!");
+var Part1 = new Part1();
+var part1Solution = Part1.Solve();
+Console.WriteLine($"Part 1: {part1Solution}");

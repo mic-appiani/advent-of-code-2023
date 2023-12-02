@@ -3,5 +3,5 @@
 public record Digit
 {
     public string Word { get; set; }
-    public string Number { get; set; }
+    public char Character { get; set; }
 }

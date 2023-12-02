@@ -18,23 +18,11 @@ public class Part2
             }
 
             var numberString = string.Empty;
+            var left = Utils.SearchNumber(input);
+            numberString += left;
 
-            var res = Utils.SearchNumber(input);
-            numberString += res;
-            // if (IsDigit(input[i]))
-            // {
-            //     numberString += input[i];
-            //     break;
-            // }
-
-            // find last digit
-            res = Utils.SearchNumber(input, reverse: true);
-            numberString += res;
-            // if (IsDigit(input[i]))
-            // {
-            //     numberString += input[i];
-            //     break;
-            // }
+            var right = Utils.SearchNumber(input, reverse: true);
+            numberString += right;
 
             // convert to int
             solution += int.Parse(numberString);

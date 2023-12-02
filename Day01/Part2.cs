@@ -1,6 +1,6 @@
-﻿namespace Day01.Part1;
+﻿namespace Day01;
 
-public class Part1
+public class Part2
 {
     public int Solve()
     {
@@ -19,25 +19,22 @@ public class Part1
 
             var numberString = string.Empty;
 
-            // find first digit
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (IsDigit(input[i]))
-                {
-                    numberString += input[i];
-                    break;
-                }
-            }
+            var res = Utils.SearchNumber(input);
+            numberString += res;
+            // if (IsDigit(input[i]))
+            // {
+            //     numberString += input[i];
+            //     break;
+            // }
 
             // find last digit
-            for (int i = input.Length - 1; i >= 0; i--)
-            {
-                if (IsDigit(input[i]))
-                {
-                    numberString += input[i];
-                    break;
-                }
-            }
+            res = Utils.SearchNumber(input, reverse: true);
+            numberString += res;
+            // if (IsDigit(input[i]))
+            // {
+            //     numberString += input[i];
+            //     break;
+            // }
 
             // convert to int
             solution += int.Parse(numberString);

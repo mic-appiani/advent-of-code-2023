@@ -17,15 +17,14 @@ public class Part2
                 break;
             }
 
-            var numberString = string.Empty;
-            var left = Utils.SearchNumber(input);
-            numberString += left;
+            var res = Utils.ScanNumbers(input);
 
-            var right = Utils.SearchNumber(input, reverse: true);
-            numberString += right;
+            var numberToParse = string.Empty;
+            numberToParse += res.First();
+            numberToParse += res.Last();
 
             // convert to int
-            solution += int.Parse(numberString);
+            solution += int.Parse(numberToParse);
         }
 
         return solution;

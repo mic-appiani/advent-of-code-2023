@@ -7,72 +7,52 @@ public static class Utils
         return c >= 48 && c <= 57;
     }
 
-    public static char SearchNumber(string input, bool reverse = false)
+    /// this method must get a start index and input string as params and returns:
+    /// success status
+    /// the first valid number
+    /// the last valid scanned index
+    public static List<char> ScanNumbers(string input)
     {
-        var startIndex = reverse ? input.Length - 1 : 0;
-        Func<int, bool> condition = i => reverse ? i >= 0 : i < input.Length;
-        Func<int, int> iterator = i => reverse ? i - 1 : i + 1;
+        List<char> list = new();
+        var startIdx = 0;
 
-        for (int i = startIndex; condition(i); i = iterator(i))
+        while (startIdx < input.Length)
         {
-            return DoSearch(input, i, reverse);
+            var result = FindNumber(input, startIdx);
+
+            if (result.Success)
+            {
+                list.Add(result.CharacterNumber);
+            }
+
+            startIdx = result.NextIndex;
         }
 
-        return (char)0;
+        return list;
     }
 
-    private static char DoSearch(string input, int startIdx, bool reverse)
+    /// <summary>
+    /// Scans from i letter by letter. If there is a valid match, it is returned.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="i"></param>
+    /// <returns></returns>
+    private static SearchResult FindNumber(string input, int startIdx)
     {
-        Func<int, bool> condition = i => reverse ? i >= 0 : i < input.Length;
-        Func<int, int> iterator = i => reverse ? i - 1 : i + 1;
-
-        var digits = reverse ? DigitsReversed : Digits;
-        var toCheck = Enumerable.Range(0, 10).ToList();
-
-        for (int i = startIdx; condition(i); i = iterator(i))
+        for (int i = startIdx; i < input.Length; i++)
         {
             if (IsDigit(input[i]))
             {
-                return input[i];
-            }
-
-            startIdx = i;
-            var matches = Matches(input[i],
-                reverse ? startIdx - i : i - startIdx,
-                toCheck, digits);
-
-            if (matches.Count == 1)
-            {
-                // make sure that this match is real..
-                var matchingIdx = matches.First();
-
-                // use the non reversed always
-                var reference = Digits[matchingIdx];
-
-                var len = reference.Word.Length;
-
-                var start = reverse ? i - len - 1 : i;
-
-                if (start < 0 || start + len > input.Length)
+                return new SearchResult
                 {
-                    continue;
-                }
-                
-                var substring = input.Substring(start, len);
-
-                if (substring.Equals(reference.Word))
-                {
-                    return digits[matchingIdx].Character;
-                }
-            }
-
-            if (matches.Count > 1)
-            {
-                toCheck = matches;
+                    Success = true,
+                    CharacterNumber = input[i],
+                    NextIndex = i + 1,
+                };
             }
         }
 
-        throw new Exception("Why did this happen?");
+        return new SearchResult { NextIndex = input.Length };
     }
 
     private static List<int> Matches(char character,
@@ -107,18 +87,11 @@ public static class Utils
         new() { Word = "eight", Character = '8' },
         new() { Word = "nine", Character = '9' },
     };
+}
 
-    public static List<Digit> DigitsReversed = new()
-    {
-        new() { Word = "orez", Character = '0' },
-        new() { Word = "eno", Character = '1' },
-        new() { Word = "owt", Character = '2' },
-        new() { Word = "eerht", Character = '3' },
-        new() { Word = "ruof", Character = '4' },
-        new() { Word = "evif", Character = '5' },
-        new() { Word = "xis", Character = '6' },
-        new() { Word = "neves", Character = '7' },
-        new() { Word = "thgie", Character = '8' },
-        new() { Word = "enin", Character = '9' },
-    };
+internal record SearchResult
+{
+    public bool Success { get; set; }
+    public char CharacterNumber { get; set; }
+    public int NextIndex { get; set; }
 }

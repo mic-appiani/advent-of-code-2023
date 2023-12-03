@@ -25,7 +25,9 @@ public static class Utils
                 list.Add(result.CharacterNumber);
             }
 
-            startIdx = result.NextIndex;
+            // was supposed to be clever and skip to save time, but some numbers overlap..
+            // ideal solution is to do a forward then a reverse scan only keeping the 1st match.
+            startIdx++;
         }
 
         return list;
@@ -50,22 +52,77 @@ public static class Utils
                     NextIndex = i + 1,
                 };
             }
+
+            var matches = Enumerable.Range(0, 10).ToList();
+            var offset = 0;
+            while (matches.Count > 1)
+            {
+                if (i + offset >= input.Length)
+                {
+                    return new SearchResult { NextIndex = i + 1 };
+                }
+
+                matches = Matches(input[i + offset], offset, matches);
+                offset++;
+            }
+
+            if (matches.Count == 1)
+            {
+                var match = Digits[matches.First()];
+
+                SearchResult res = LinearScan(input, i, match.Word);
+                if (res.Success)
+                {
+                    res.CharacterNumber = match.Character;
+                    return res;
+                }
+
+                return new SearchResult { NextIndex = i + 1 };
+            }
+
+            if (matches.Count == 0)
+            {
+                return new SearchResult { NextIndex = i + 1 };
+            }
         }
 
         return new SearchResult { NextIndex = input.Length };
     }
 
-    private static List<int> Matches(char character,
-        int idx,
-        List<int> idxToCheck,
-        List<Digit> reference)
+    private static SearchResult LinearScan(string input, int startIdx, string word)
     {
+        for (int i = 0; i < word.Length; i++)
+        {
+            if (i + startIdx >= input.Length)
+            {
+                return new SearchResult { Success = false };
+            }
+
+            if (!word[i].Equals(input[startIdx + i]))
+            {
+                return new SearchResult { Success = false };
+            }
+        }
+
+        return new SearchResult
+        {
+            Success = true,
+            NextIndex = startIdx + word.Length,
+        };
+    }
+
+    private static List<int> Matches(
+        char character,
+        int offset,
+        List<int> idxToCheck)
+    {
+        var reference = Digits;
         var matches = new List<int>();
 
         for (int i = 0; i < idxToCheck.Count; i++)
         {
             var word = reference[idxToCheck[i]].Word;
-            if (idx < word.Length && character == word[idx])
+            if (offset < word.Length && character == word[offset])
             {
                 matches.Add(idxToCheck[i]);
             }

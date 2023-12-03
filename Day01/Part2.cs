@@ -11,7 +11,8 @@ public class Part2
         while (!sr.EndOfStream)
         {
             input = sr.ReadLine();
-
+            // Console.WriteLine($"input: {input}");
+            
             if (input is null)
             {
                 break;

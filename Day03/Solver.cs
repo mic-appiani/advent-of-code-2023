@@ -2,7 +2,7 @@
 
 namespace Day03;
 
-public class Part1
+public class Solver
 {
     public const char WhiteSpace = '.';
 
@@ -22,7 +22,7 @@ public class Part1
 
     private readonly List<List<char>> _matrix = new();
 
-    public int Solve()
+    public int Solve(int part)
     {
         string? input;
         var solution = 0;
@@ -59,10 +59,17 @@ public class Part1
                 var surroundingNumbers = ScanSurrounds(row, col);
 
                 // add the number to the solution
-                foreach (var number in surroundingNumbers)
+                if (part == 1)
                 {
-                    Console.WriteLine(number);
-                    solution += int.Parse(number);
+                    foreach (var number in surroundingNumbers)
+                    {
+                        solution += number;
+                    }
+                }
+                else if (part == 2 &&
+                         surroundingNumbers.Count == 2)
+                {
+                    solution += surroundingNumbers[0] * surroundingNumbers[1];
                 }
             }
         }
@@ -71,7 +78,7 @@ public class Part1
     }
 
     // finds all the numbers surrounding the location
-    private List<string> ScanSurrounds(int row, int col)
+    private List<int> ScanSurrounds(int row, int col)
     {
         var minRow = row == 0 ? 0 : row - 1;
         var maxRow = row == _matrix.Count - 1 ? _matrix.Count - 1 : row + 1;
@@ -92,7 +99,9 @@ public class Part1
         }
 
         // todo: this is ugly. removing duplicates hoping that there is no legit duplicate in the sample! sad
-        return numbers.Distinct().ToList();
+        return numbers.Distinct()
+            .Select(x => int.Parse(x))
+            .ToList();
     }
 
     private string ExtractCompleteNumber(int row, int col)

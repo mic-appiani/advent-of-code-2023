@@ -43,8 +43,6 @@ public class Part1
                     gameIsPossible = false;
                     break;
                 }
-
-                Console.WriteLine();
             }
 
             if (gameIsPossible)

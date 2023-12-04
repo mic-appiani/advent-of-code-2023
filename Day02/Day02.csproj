@@ -13,4 +13,8 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Day01\Day01.csproj" />
+    </ItemGroup>
+
 </Project>

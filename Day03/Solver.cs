@@ -136,9 +136,3 @@ public class Solver
         return Digits.TryGetValue(value, out _);
     }
 }
-
-internal class Coordinates
-{
-    public int Row { get; set; }
-    public int Col { get; set; }
-}

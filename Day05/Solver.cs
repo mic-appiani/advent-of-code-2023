@@ -17,11 +17,6 @@ public class Solver
         farmingMap.LoadAllMaps(sr);
 
         return helper.Solve(farmingMap);
-        // read maps in sections
-        // compute calculation necessary to move from map to map
-        // (create helper methods that takes and input value and gives the destination directly,
-        // to be used in the next map, and so on, to the location number)
-        // return the smallest locaton number (day 1 solution)
     }
 
 

@@ -27,24 +27,10 @@ public class Part2 : IDay5Solver
 
     public long Solve(FarmingMap maps)
     {
-        foreach (var range in _seedRanges)
-        {
-            Console.WriteLine($"range {range.Key} to {range.Value}");
-            for (long i = range.Key ; i <= range.Value; i++)
-            {
-                if (i % 1_000_000 == 0)
-                {
-                    Console.WriteLine($"progress :{(double)(i - range.Key) / (range.Value - range.Key)}");
-                }
-
-                var result = maps.MapSeedToLocation(i);
-
-                if (result < _solution)
-                {
-                    _solution = result;
-                }
-            }
-        }
+        // iterate the location ranges starting from the one with the lowest start value
+        // find the seed by reverse mapping
+        // if the seed exists in the seed ranges, return the location
+        
 
         return _solution;
     }

@@ -1,65 +1,59 @@
 ﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Day05;
 
 public class Solver
 {
-    private long _solution = long.MaxValue;
     private const int DestinationRangeStart = 0;
     private const int SourceRangeStart = 1;
     private const int RangeLength = 2;
 
-    public long Solve(int part)
+    public long Solve(IDay5Solver helper)
     {
         string? input;
 
         using var sr = new StreamReader("input.txt");
         input = sr.ReadLine();
 
-        string pattern = "seeds: (.+)";
-        Regex regex = new Regex(pattern);
-        Match match = regex.Match(input!);
-        var seeds = match.Groups[1].Value.Split(' ').Select(s => long.Parse(s));
+        helper.ParseSeeds(input);
 
+        Dictionary<MapType, List<long[]>> maps = new();
         AdvanceToLabel("seed-to-soil map:", sr);
-        var seedToSoil = MapSection(sr);
+        maps[MapType.SeedToSoil] = MapSection(sr);
         AdvanceToLabel("soil-to-fertilizer map:", sr);
-        var soilToFertilizer = MapSection(sr);
+        maps[MapType.SoilToFertilizer] = MapSection(sr);
         AdvanceToLabel("fertilizer-to-water map:", sr);
-        var fertilizerToWater = MapSection(sr);
+        maps[MapType.FertilizerToWater] = MapSection(sr);
         AdvanceToLabel("water-to-light map:", sr);
-        var waterToLight = MapSection(sr);
+        maps[MapType.WaterToLight] = MapSection(sr);
         AdvanceToLabel("light-to-temperature map:", sr);
-        var lightToTemp = MapSection(sr);
+        maps[MapType.LightToTemperature] = MapSection(sr);
         AdvanceToLabel("temperature-to-humidity map:", sr);
-        var tempToHumidity = MapSection(sr);
+        maps[MapType.TemperatureToHumidity] = MapSection(sr);
         AdvanceToLabel("humidity-to-location map:", sr);
-        var humidityToLocation = MapSection(sr);
+        maps[MapType.HumidityToLocation] = MapSection(sr);
 
+        return helper.Solve(maps);
         // read maps in sections
         // compute calculation necessary to move from map to map
         // (create helper methods that takes and input value and gives the destination directly,
         // to be used in the next map, and so on, to the location number)
         // return the smallest locaton number (day 1 solution)
-        foreach (var seed in seeds)
-        {
-            var result = GetDestination(seed, seedToSoil);
-            result = GetDestination(result, soilToFertilizer);
-            result = GetDestination(result, fertilizerToWater);
-            result = GetDestination(result, waterToLight);
-            result = GetDestination(result, lightToTemp);
-            result = GetDestination(result, tempToHumidity);
-            result = GetDestination(result, humidityToLocation);
-
-            if (result < _solution)
-            {
-                _solution = result;
-            }
-        }
-
-        return _solution;
     }
 
-    private long GetDestination(long i, List<long[]> referenceMap)
+    public static long MapSeedToLocation(long seed, Dictionary<MapType, List<long[]>> maps)
+    {
+        var result = GetDestination(seed, maps[MapType.SeedToSoil]);
+        result = GetDestination(result, maps[MapType.SoilToFertilizer]);
+        result = GetDestination(result, maps[MapType.FertilizerToWater]);
+        result = GetDestination(result, maps[MapType.WaterToLight]);
+        result = GetDestination(result, maps[MapType.LightToTemperature]);
+        result = GetDestination(result, maps[MapType.TemperatureToHumidity]);
+        result = GetDestination(result, maps[MapType.HumidityToLocation]);
+        return result;
+    }
+
+    private static long GetDestination(long i, List<long[]> referenceMap)
     {
         // find the map where i is. Assume only one match
         var map = referenceMap
@@ -68,7 +62,7 @@ public class Solver
 
         if (map is null)
         {
-            Console.WriteLine("no map");
+            // Console.WriteLine("no map");
             return i;
         }
 
@@ -107,4 +101,15 @@ public class Solver
 
         throw new Exception("Label not found");
     }
+}
+
+public enum MapType
+{
+    SeedToSoil,
+    SoilToFertilizer,
+    FertilizerToWater,
+    WaterToLight,
+    LightToTemperature,
+    TemperatureToHumidity,
+    HumidityToLocation
 }

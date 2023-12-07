@@ -1,7 +1,6 @@
 ﻿public class FarmingMap
 {
     Dictionary<MapType, List<long[]>> _maps = new();
-    Dictionary<MapType, List<long[]>> _reverseMaps = new();
 
     private const int DestinationRangeStart = 0;
     private const int SourceRangeStart = 1;
@@ -29,17 +28,28 @@
 
         Solver.AdvanceToLabel("humidity-to-location map:", sr);
         _maps[MapType.HumidityToLocation] = Solver.MapSection(sr);
-
-        // ReverseMaps();
     }
 
-    // private void ReverseMaps()
-    // {
-    //     foreach (var map in _maps)
-    //     {
-    //         _reverseMaps[map.Key] = new() { map.Value[1], map.Value[0] };
-    //     }
-    // }
+    /// <summary>
+    /// Gets an ordered list of locations. The retuerned array containes the start and end value of
+    /// the range, inclusive.
+    /// </summary>
+    /// <returns></returns>
+    public List<long[]> GetOrderedLocations()
+    {
+        // DestinationRangeStart, destination plus len
+        var map = _maps[MapType.HumidityToLocation];
+
+        var locationRanges = map
+            .Select(x => new long[]
+            {
+                x[DestinationRangeStart],
+                x[DestinationRangeStart] + x[RangeLength] - 1
+            }).OrderBy(x => x[0])
+            .ToList();
+
+        return locationRanges;
+    }
 
     public long MapSeedToLocation(long seed)
     {
@@ -72,8 +82,8 @@
         {
             var firstInRange = x[SourceRangeStart];
             var lastInRange = x[SourceRangeStart] + x[RangeLength] - 1;
-            
-            return firstInRange <= sourceValue && sourceValue <= lastInRange ;
+
+            return firstInRange <= sourceValue && sourceValue <= lastInRange;
         });
 
         if (map is null)
@@ -92,17 +102,17 @@
         {
             var firstInRange = x[DestinationRangeStart];
             var lastInRange = x[DestinationRangeStart] + x[RangeLength] - 1;
-            
-            return firstInRange <= destinationValue && destinationValue <= lastInRange ;
+
+            return firstInRange <= destinationValue && destinationValue <= lastInRange;
         });
-        
+
         if (map is null)
         {
             return destinationValue;
         }
 
-        var offset = destinationValue - map[SourceRangeStart];
+        var offset = destinationValue - map[DestinationRangeStart];
 
-        return map[DestinationRangeStart] + offset;
+        return map[SourceRangeStart] - offset;
     }
 }

@@ -17,11 +17,11 @@ public class Part1 : IDay5Solver
             .ToList();
     }
 
-    public long Solve(Dictionary<MapType, List<long[]>> maps)
+    public long Solve(FarmingMap maps)
     {
         foreach (var seed in _seeds)
         {
-            var result = Solver.MapSeedToLocation(seed, maps);
+            var result = maps.MapSeedToLocation(seed);
 
             if (result < _solution)
             {

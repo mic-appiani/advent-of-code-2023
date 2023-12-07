@@ -4,7 +4,8 @@ namespace Day05;
 
 public class Part2 : IDay5Solver
 {
-    private readonly List<long[]> _seedRanges = new();
+    // seed ranges are first and last seed, inclusive
+    private readonly SortedDictionary<long, long> _seedRanges = new();
     private long _solution = long.MaxValue;
 
     private const int SeedRangeStart = 0;
@@ -19,25 +20,24 @@ public class Part2 : IDay5Solver
         {
             var split = match.Value.Split(' ').ToArray();
             var range = split.Select(x => long.Parse(x)).ToArray();
-            _seedRanges.Add(range);
+            _seedRanges.Add(range[SeedRangeStart], 
+                range[SeedRangeStart] + range[SeedRangeLength] - 1);
         }
     }
 
-    public long Solve(Dictionary<MapType, List<long[]>> maps)
+    public long Solve(FarmingMap maps)
     {
         foreach (var range in _seedRanges)
         {
-            Console.WriteLine($"range {_seedRanges.IndexOf(range)} of {_seedRanges.Count}");
-            var initial = range[SeedRangeStart];
-            var final = range[SeedRangeStart] + range[SeedRangeLength];
-            for (long i = initial; i < final; i++)
+            Console.WriteLine($"range {range.Key} to {range.Value}");
+            for (long i = range.Key ; i <= range.Value; i++)
             {
                 if (i % 1_000_000 == 0)
                 {
-                    Console.WriteLine($"progress :{(double)(i - initial) / (final - initial)}");
+                    Console.WriteLine($"progress :{(double)(i - range.Key) / (range.Value - range.Key)}");
                 }
 
-                var result = Solver.MapSeedToLocation(i, maps);
+                var result = maps.MapSeedToLocation(i);
 
                 if (result < _solution)
                 {

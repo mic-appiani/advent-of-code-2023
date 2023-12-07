@@ -1,4 +1,6 @@
-﻿public class FarmingMap
+﻿using System.Diagnostics;
+
+public class FarmingMap
 {
     Dictionary<MapType, List<long[]>> _maps = new();
 
@@ -60,6 +62,10 @@
         result = GetDestination(result, _maps[MapType.LightToTemperature]);
         result = GetDestination(result, _maps[MapType.TemperatureToHumidity]);
         result = GetDestination(result, _maps[MapType.HumidityToLocation]);
+
+        var sanity = MapLocationToSeed(result);
+        Debug.Assert(sanity == seed);
+        
         return result;
     }
 
@@ -113,6 +119,6 @@
 
         var offset = destinationValue - map[DestinationRangeStart];
 
-        return map[SourceRangeStart] - offset;
+        return map[SourceRangeStart] + offset;
     }
 }

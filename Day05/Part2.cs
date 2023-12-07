@@ -33,6 +33,8 @@ public class Part2 : IDay5Solver
         // if the seed exists in the seed ranges, return the location
         var locs = maps.GetOrderedLocations();
 
+        // using reverse mapping from the closes location
+        // todo: maybe some day i will try to understand the better solution
         foreach (var range in locs)
         {
             for (long i = range[0]; i <= range[1]; i++)
@@ -51,6 +53,7 @@ public class Part2 : IDay5Solver
 
     private bool IsInSeeds(long seed)
     {
-        return _seedRanges.Any(r => r.Key <= seed && seed >= r.Value);
+        // var range = _seedRanges.Single(r => r.Key <= seed && seed <= r.Value);
+        return _seedRanges.Any(r => r.Key <= seed && seed <= r.Value);
     }
 }

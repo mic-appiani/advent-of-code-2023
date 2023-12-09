@@ -33,12 +33,6 @@ public class Solver
             _solution += winnings;
         }
 
-        // todo: find a way to rank each hand to solve both a tie breaker (sum card value multiplied
-        // by position, left side most significant), and the general rank based on hand composition
-        // (the latter having more weight).
-
-        // lower value hands has smaller score, lowest rank is 1 (add 1 to index)
-
         return _solution;
     }
 
@@ -49,7 +43,7 @@ public class Solver
         score += ScoreForHandType(cards);
 
         // calculate and add card weight score
-        score = ScoreForCardsOrder(cards);
+        score += ScoreForCardsOrder(cards);
         return score;
     }
 
@@ -70,13 +64,61 @@ public class Solver
     private int ScoreForHandType(string cards)
     {
         var type = 0;
-        
-        // determine hand type
-        
+        // 7 possible types
+
+        var dict = new Dictionary<char, byte>();
+        for (int i = 0; i < cards.Length; i++)
+        {
+            var card = cards[i];
+            if (!dict.TryAdd(card, 1))
+            {
+                dict[card]++;
+            }
+        }
+
+        if (dict.Count == 5)
+        {
+            type = 1;
+        }
+
+        if (dict.Count == 4)
+        {
+            type = 2;
+        }
+
+        if (dict.Count == 3)
+        {
+            if (dict.Values.Any(x => x == 3))
+            {
+                type = 4;
+            }
+            else
+            {
+                type = 3;
+            }
+        }
+
+        if (dict.Count == 2)
+        {
+            if (dict.Values.Any(x => x == 4))
+            {
+                type = 6;
+            }
+            else
+            {
+                type = 5;
+            }
+        }
+
+        if (dict.Count == 1)
+        {
+            type = 7;
+        }
+
         return type * 1_000_000;
     }
 
-    private static Dictionary<char, int> CardValues = new()
+    private static readonly Dictionary<char, int> CardValues = new()
     {
         { '2', 2 },
         { '3', 3 },

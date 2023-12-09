@@ -55,7 +55,7 @@ public class Solver
         {
             var value = CardValues[cards[i]];
             score += value * multiplier;
-            multiplier *= 10;
+            multiplier *= 15;
         }
 
         return score;
@@ -63,7 +63,7 @@ public class Solver
 
     private int ScoreForHandType(string cards)
     {
-        var type = 0;
+        var type = -1;
         // 7 possible types
 
         var dict = new Dictionary<char, byte>();

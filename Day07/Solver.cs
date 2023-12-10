@@ -1,4 +1,7 @@
-﻿namespace Day07;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+
+namespace Day07;
 
 public class Solver
 {
@@ -63,17 +66,33 @@ public class Solver
 
     private int ScoreForHandType(string cards, int part)
     {
+        var cardArray = cards.ToCharArray();
+
         var type = HandType.Unknown;
         // 7 possible types
 
-        var dict = new Dictionary<char, byte>();
-        for (int i = 0; i < cards.Length; i++)
+        var dict = new Dictionary<char, CardData>();
+        for (byte i = 0; i < cardArray.Length; i++)
         {
-            var card = cards[i];
-            if (!dict.TryAdd(card, 1))
+            var card = cardArray[i];
+            if (dict.TryGetValue(card, out var value))
             {
-                dict[card]++;
+                value.Frequency++;
+                value.Positions.Add(i);
             }
+            else
+            {
+                dict.Add(card, new CardData
+                {
+                    Frequency = 1,
+                    Positions = [i]
+                });
+            }
+        }
+
+        if (part == 2)
+        {
+            SubstituteJokers(cardArray, dict);
         }
 
         if (dict.Count == 5)
@@ -88,15 +107,16 @@ public class Solver
 
         if (dict.Count == 3)
         {
-            type = dict.Values.Any(x => x == 3)
+            type = dict.Values.Any(x => x.Frequency == 3)
                 ? HandType.ThreeOfAKind
                 : HandType.TwoPairs;
         }
 
         if (dict.Count == 2)
         {
-            type = dict.Values.Any(x => x == 4) 
-                ? HandType.FourOfAKind : HandType.FullHouse;
+            type = dict.Values.Any(x => x.Frequency == 4)
+                ? HandType.FourOfAKind
+                : HandType.FullHouse;
         }
 
         if (dict.Count == 1)
@@ -106,6 +126,38 @@ public class Solver
 
         return (int)type * 1_000_000;
     }
+
+    private void SubstituteJokers(char[] cardArray, Dictionary<char, CardData> dict)
+    {
+        if (!dict.TryGetValue('J', out CardData? joker))
+        {
+            return;
+        }
+
+        char mostFrequentCard = dict
+            .OrderByDescending(x => x.Value.Positions.Count)
+            .FirstOrDefault(x => x.Key != 'J').Key;
+
+        if (mostFrequentCard == default)
+        {
+            mostFrequentCard = 'A';
+            dict.Clear();
+            dict['A'] = new CardData { Frequency = 5, Positions = [0, 1, 2, 3, 4] };
+        }
+
+        for (byte i = 0; i < joker.Positions.Count; i++)
+        {
+            cardArray[joker.Positions[i]] = mostFrequentCard;
+            
+            dict[mostFrequentCard].Frequency++;
+            dict[mostFrequentCard].Positions.Add(i);
+            
+            
+        }
+
+        dict.Remove('J');
+    }
+
 
     private static readonly Dictionary<char, int> CardValuesWithJoker = new()
     {
@@ -140,6 +192,12 @@ public class Solver
         { 'K', 13 },
         { 'A', 14 },
     };
+}
+
+internal class CardData
+{
+    public byte Frequency { get; set; }
+    public List<byte> Positions { get; set; }
 }
 
 internal class Hand

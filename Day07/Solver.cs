@@ -18,7 +18,7 @@ public class Solver
             {
                 Cards = split[0],
                 Bet = int.Parse(split[1]),
-                Score = Rank(split[0]),
+                Score = Rank(split[0], part),
             };
 
             _handsRanking.Add(hand);
@@ -36,24 +36,26 @@ public class Solver
         return _solution;
     }
 
-    private long Rank(string cards)
+    private long Rank(string cards, int part)
     {
         var score = 0;
         // calculate hand score
-        score += ScoreForHandType(cards);
+        score += ScoreForHandType(cards,  part);
 
         // calculate and add card weight score
-        score += ScoreForCardsOrder(cards);
+        score += ScoreForCardsOrder(cards, part);
         return score;
     }
 
-    private int ScoreForCardsOrder(string cards)
+    private int ScoreForCardsOrder(string cards, int part)
     {
         var multiplier = 1;
         var score = 0;
+        var deck = part == 1 ? CardValues : CardValuesWithJoker;
+        
         for (int i = cards.Length - 1; i >= 0; i--)
         {
-            var value = CardValues[cards[i]];
+            var value = deck[cards[i]];;
             score += value * multiplier;
             multiplier *= 15;
         }
@@ -61,7 +63,7 @@ public class Solver
         return score;
     }
 
-    private int ScoreForHandType(string cards)
+    private int ScoreForHandType(string cards, int part)
     {
         var type = -1;
         // 7 possible types
@@ -118,6 +120,23 @@ public class Solver
         return type * 1_000_000;
     }
 
+    private static readonly Dictionary<char, int> CardValuesWithJoker = new()
+    {
+        { '2', 2 },
+        { '3', 3 },
+        { '4', 4 },
+        { '5', 5 },
+        { '6', 6 },
+        { '7', 7 },
+        { '8', 8 },
+        { '9', 9 },
+        { 'T', 10 },
+        { 'J', 1 },
+        { 'Q', 12 },
+        { 'K', 13 },
+        { 'A', 14 },
+    };
+    
     private static readonly Dictionary<char, int> CardValues = new()
     {
         { '2', 2 },

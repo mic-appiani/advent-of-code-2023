@@ -1,4 +1,6 @@
-﻿var part1 = new Solver();
+﻿using Day07;
+
+var part1 = new Solver();
 var part1Solution = part1.Solve(1);
 Console.WriteLine($"Part 1: {part1Solution}");
 

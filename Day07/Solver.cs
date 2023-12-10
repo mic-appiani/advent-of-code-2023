@@ -1,19 +1,17 @@
-﻿using System.Text.RegularExpressions;
+﻿namespace Day07;
 
 public class Solver
 {
-    private int _solution = 0;
-    private List<Hand> _handsRanking = new();
+    private int _solution;
+    private readonly List<Hand> _handsRanking = new();
 
     public int Solve(int part)
     {
         using var sr = new StreamReader("input.txt");
-        string? input;
         while (!sr.EndOfStream)
         {
-            input = sr.ReadLine();
-
-            var split = input.Split(' ');
+            var input = sr.ReadLine();
+            var split = input!.Split(' ');
             var hand = new Hand
             {
                 Cards = split[0],
@@ -40,7 +38,7 @@ public class Solver
     {
         var score = 0;
         // calculate hand score
-        score += ScoreForHandType(cards,  part);
+        score += ScoreForHandType(cards, part);
 
         // calculate and add card weight score
         score += ScoreForCardsOrder(cards, part);
@@ -52,10 +50,10 @@ public class Solver
         var multiplier = 1;
         var score = 0;
         var deck = part == 1 ? CardValues : CardValuesWithJoker;
-        
+
         for (int i = cards.Length - 1; i >= 0; i--)
         {
-            var value = deck[cards[i]];;
+            var value = deck[cards[i]];
             score += value * multiplier;
             multiplier *= 15;
         }
@@ -65,7 +63,7 @@ public class Solver
 
     private int ScoreForHandType(string cards, int part)
     {
-        var type = -1;
+        var type = HandType.Unknown;
         // 7 possible types
 
         var dict = new Dictionary<char, byte>();
@@ -80,44 +78,33 @@ public class Solver
 
         if (dict.Count == 5)
         {
-            type = 1;
+            type = HandType.HighCard;
         }
 
         if (dict.Count == 4)
         {
-            type = 2;
+            type = HandType.Pair;
         }
 
         if (dict.Count == 3)
         {
-            if (dict.Values.Any(x => x == 3))
-            {
-                type = 4;
-            }
-            else
-            {
-                type = 3;
-            }
+            type = dict.Values.Any(x => x == 3)
+                ? HandType.ThreeOfAKind
+                : HandType.TwoPairs;
         }
 
         if (dict.Count == 2)
         {
-            if (dict.Values.Any(x => x == 4))
-            {
-                type = 6;
-            }
-            else
-            {
-                type = 5;
-            }
+            type = dict.Values.Any(x => x == 4) 
+                ? HandType.FourOfAKind : HandType.FullHouse;
         }
 
         if (dict.Count == 1)
         {
-            type = 7;
+            type = HandType.FiveOfAKind;
         }
 
-        return type * 1_000_000;
+        return (int)type * 1_000_000;
     }
 
     private static readonly Dictionary<char, int> CardValuesWithJoker = new()
@@ -136,7 +123,7 @@ public class Solver
         { 'K', 13 },
         { 'A', 14 },
     };
-    
+
     private static readonly Dictionary<char, int> CardValues = new()
     {
         { '2', 2 },
@@ -157,7 +144,19 @@ public class Solver
 
 internal class Hand
 {
-    public string Cards { get; set; }
+    public string Cards { get; set; } = string.Empty;
     public int Bet { get; set; }
     public long Score { get; set; }
+}
+
+public enum HandType
+{
+    Unknown = 0,
+    HighCard = 1,
+    Pair = 2,
+    TwoPairs = 3,
+    ThreeOfAKind = 4,
+    FullHouse = 5,
+    FourOfAKind = 6,
+    FiveOfAKind = 7,
 }

@@ -10,15 +10,14 @@
         {
             var input = sr.ReadLine();
 
-            var lastNumsInSequences = new List<int>();
+            var sequences = new List<List<int>>();
             var sequence = input!.Split(' ')
                 .Select(x => int.Parse(x)).ToList();
 
             var allZeros = false;
             while (!allZeros)
             {
-                lastNumsInSequences.Add(sequence.Last());
-
+                sequences.Add(sequence);
                 var newSequence = new List<int>();
 
                 var zeros = 0;
@@ -43,7 +42,7 @@
             }
 
 
-            _solution += lastNumsInSequences.Sum();
+            _solution += sequences.Select(x => x.Last()).Sum();
             // for each sequence, create a new sequence that is one smaller than the original sequence
             // repeat until the sequence is all zeros
             // sum the last element in each sequence including the original, this is the prediction

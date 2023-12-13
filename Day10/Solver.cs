@@ -11,7 +11,7 @@ public class Solver
 
     public int Solve(int part)
     {
-        using var sr = new StreamReader("sample_2.txt");
+        using var sr = new StreamReader("input.txt");
 
         var currentRow = -1;
         while (!sr.EndOfStream)
@@ -35,64 +35,70 @@ public class Solver
         }
 
         _visited = new bool[_map.Count, _map[0].Count];
-        Pipe? nextPipe = FindConnection(_startRow, _startCol);
+        var nextPipe = Pipe.SetInitial(_startRow, _startCol, 'L');
+        nextPipe = FindConnection(nextPipe);
         var steps = 0;
 
-        while (nextPipe is not null)
+        while (!_visited[nextPipe.Row, nextPipe.Col])
         {
             steps++;
             _visited[nextPipe.Row, nextPipe.Col] = true;
             // must track visited pipes
-            nextPipe = FindConnection(nextPipe.Row, nextPipe.Col);
+            nextPipe = FindConnection(nextPipe);
         }
 
         PrintMap();
-        _solution = (int)Math.Ceiling((double)steps / 2);
+        _solution = (int)Math.Ceiling((double)(steps - 1) / 2);
         return _solution;
     }
 
-    private Pipe? FindConnection(int startRow, int startCol)
+
+    private Pipe FindConnection(Pipe sourcePipe)
     {
         // for now let's ignore boundaries because i'm feeling lucky
         // check connections up
-        Pipe pipe;
-        if (startRow > 0)
+        Pipe destPipe;
+        if (sourcePipe.Row > 0)
         {
-            pipe = new Pipe(startRow - 1, startCol, _map);
+            destPipe = new Pipe(sourcePipe.Row - 1, sourcePipe.Col, _map);
 
-            if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+            if (destPipe.CanConnectTo(sourcePipe.Row, sourcePipe.Col) &&
+                !_visited[destPipe.Row, destPipe.Col])
             {
-                return pipe;
+                return destPipe;
             }
         }
 
-        if (startRow < _map.Count - 1)
+        if (sourcePipe.Row < _map.Count - 1)
         {
-            pipe = new Pipe(startRow + 1, startCol, _map);
+            destPipe = new Pipe(sourcePipe.Row + 1, sourcePipe.Col, _map);
 
-            if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+            if (destPipe.CanConnectTo(sourcePipe.Row, sourcePipe.Col) &&
+                !_visited[destPipe.Row, destPipe.Col])
             {
-                return pipe;
+                return destPipe;
             }
         }
 
-        if (startCol > 0)
+        if (sourcePipe.Col > 0)
         {
-            pipe = new Pipe(startRow, startCol - 1, _map);
+            destPipe = new Pipe(sourcePipe.Row, sourcePipe.Col - 1, _map);
 
-            if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+            if (destPipe.CanConnectTo(sourcePipe.Row, sourcePipe.Col) &&
+                !_visited[destPipe.Row, destPipe.Col])
             {
-                return pipe;
+                return destPipe;
             }
         }
 
-        if (startCol < _map[0].Count - 1) ;
+        if (sourcePipe.Col < _map[0].Count - 1) ;
         {
-            pipe = new Pipe(startRow, startCol + 1, _map);
+            destPipe = new Pipe(sourcePipe.Row, sourcePipe.Col + 1, _map);
 
-            if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+            if (destPipe.CanConnectTo(sourcePipe.Row, sourcePipe.Col) &&
+                !_visited[destPipe.Row, destPipe.Col])
             {
-                return pipe;
+                return destPipe;
             }
         }
 
@@ -122,6 +128,13 @@ public class Pipe
         Row = row;
         Col = col;
         Symbol = map[row][col];
+    }
+
+    private Pipe(int row, int col, char symbol)
+    {
+        Row = row;
+        Col = col;
+        Symbol = symbol;
     }
 
     public char Symbol { get; set; }
@@ -250,6 +263,11 @@ public class Pipe
         }
 
         throw new ArgumentException("Invalid entry direction");
+    }
+
+    public static Pipe SetInitial(int startRow, int startCol, char c)
+    {
+        return new Pipe(startRow, startCol, c);
     }
 }
 

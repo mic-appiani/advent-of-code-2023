@@ -34,7 +34,6 @@ public class Solver
             _map.Add(row);
         }
 
-        PrintMap();
         _visited = new bool[_map.Count, _map[0].Count];
         Pipe? nextPipe = FindConnection(_startRow, _startCol);
         var steps = 0;
@@ -47,6 +46,7 @@ public class Solver
             nextPipe = FindConnection(nextPipe.Row, nextPipe.Col);
         }
 
+        PrintMap();
         _solution = (int)Math.Ceiling((double)steps / 2);
         return _solution;
     }
@@ -55,32 +55,45 @@ public class Solver
     {
         // for now let's ignore boundaries because i'm feeling lucky
         // check connections up
-        var pipe = new Pipe(startRow - 1, startCol, _map);
-
-        if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+        Pipe pipe;
+        if (startRow > 0)
         {
-            return pipe;
+            pipe = new Pipe(startRow - 1, startCol, _map);
+
+            if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+            {
+                return pipe;
+            }
         }
 
-        pipe = new Pipe(startRow + 1, startCol, _map);
-
-        if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+        if (startRow < _map.Count - 1)
         {
-            return pipe;
+            pipe = new Pipe(startRow + 1, startCol, _map);
+
+            if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+            {
+                return pipe;
+            }
         }
 
-        pipe = new Pipe(startRow, startCol - 1, _map);
-
-        if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+        if (startCol > 0)
         {
-            return pipe;
+            pipe = new Pipe(startRow, startCol - 1, _map);
+
+            if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+            {
+                return pipe;
+            }
         }
 
-        pipe = new Pipe(startRow, startCol + 1, _map);
-
-        if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+        if (startCol < _map[0].Count - 1) ;
         {
-            return pipe;
+            pipe = new Pipe(startRow, startCol + 1, _map);
+
+            if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
+            {
+                return pipe;
+            }
         }
 
         return null;
@@ -90,13 +103,14 @@ public class Solver
     {
         for (int row = 0; row < _map.Count; row++)
         {
-            var line = "";
             for (int col = 0; col < _map[row].Count; col++)
             {
-                line += _map[row][col];
+                Console.ForegroundColor = _visited[row, col] ? ConsoleColor.Red : ConsoleColor.Gray;
+
+                Console.Write(_map[row][col]);
             }
 
-            Console.WriteLine(line);
+            Console.WriteLine();
         }
     }
 }

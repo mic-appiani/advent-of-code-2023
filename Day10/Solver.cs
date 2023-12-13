@@ -35,15 +35,15 @@ public class Solver
         }
 
         _visited = new bool[_map.Count, _map[0].Count];
+        _map[_startRow][_startCol] = 'L';
         var nextPipe = Pipe.SetInitial(_startRow, _startCol, 'L');
-        nextPipe = FindConnection(nextPipe);
         var steps = 0;
 
-        while (!_visited[nextPipe.Row, nextPipe.Col])
+        while (nextPipe != null && !_visited[nextPipe.Row, nextPipe.Col])
         {
             steps++;
+            Console.WriteLine(steps);
             _visited[nextPipe.Row, nextPipe.Col] = true;
-            // must track visited pipes
             nextPipe = FindConnection(nextPipe);
         }
 
@@ -53,7 +53,7 @@ public class Solver
     }
 
 
-    private Pipe FindConnection(Pipe sourcePipe)
+    private Pipe? FindConnection(Pipe sourcePipe)
     {
         // for now let's ignore boundaries because i'm feeling lucky
         // check connections up
@@ -62,8 +62,7 @@ public class Solver
         {
             destPipe = new Pipe(sourcePipe.Row - 1, sourcePipe.Col, _map);
 
-            if (destPipe.CanConnectTo(sourcePipe.Row, sourcePipe.Col) &&
-                !_visited[destPipe.Row, destPipe.Col])
+            if (Connectible(sourcePipe, destPipe))
             {
                 return destPipe;
             }
@@ -73,8 +72,7 @@ public class Solver
         {
             destPipe = new Pipe(sourcePipe.Row + 1, sourcePipe.Col, _map);
 
-            if (destPipe.CanConnectTo(sourcePipe.Row, sourcePipe.Col) &&
-                !_visited[destPipe.Row, destPipe.Col])
+            if (Connectible(sourcePipe, destPipe))
             {
                 return destPipe;
             }
@@ -84,8 +82,7 @@ public class Solver
         {
             destPipe = new Pipe(sourcePipe.Row, sourcePipe.Col - 1, _map);
 
-            if (destPipe.CanConnectTo(sourcePipe.Row, sourcePipe.Col) &&
-                !_visited[destPipe.Row, destPipe.Col])
+            if (Connectible(sourcePipe, destPipe))
             {
                 return destPipe;
             }
@@ -95,14 +92,26 @@ public class Solver
         {
             destPipe = new Pipe(sourcePipe.Row, sourcePipe.Col + 1, _map);
 
-            if (destPipe.CanConnectTo(sourcePipe.Row, sourcePipe.Col) &&
-                !_visited[destPipe.Row, destPipe.Col])
+            if (Connectible(sourcePipe, destPipe))
             {
                 return destPipe;
             }
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Checks if the pipes can connect to each other and if the pipe has not been visited 
+    /// </summary>
+    /// <param name="sourcePipe"></param>
+    /// <param name="destPipe"></param>
+    /// <returns></returns>
+    private bool Connectible(Pipe sourcePipe, Pipe destPipe)
+    {
+        return destPipe.CanConnectTo(sourcePipe) &&
+               sourcePipe.CanConnectTo(destPipe) &&
+               !_visited[destPipe.Row, destPipe.Col];
     }
 
     private void PrintMap()
@@ -141,24 +150,25 @@ public class Pipe
     public int Row { get; set; }
     public int Col { get; set; }
 
-    public bool CanConnectTo(int row, int col)
+    public bool CanConnectTo(Pipe pipe)
     {
-        var direction = GetRelativePosition(row, col);
+        var pos = PositionOf(pipe.Row, pipe.Col);
+
         return Symbol switch
         {
-            '|' => direction == Direction.South || direction == Direction.North,
-            '-' => direction == Direction.East || direction == Direction.West,
-            'L' => direction == Direction.East || direction == Direction.North,
-            'J' => direction == Direction.West || direction == Direction.North,
-            '7' => direction == Direction.West || direction == Direction.South,
-            'F' => direction == Direction.East || direction == Direction.South,
+            '|' => pos == Direction.South || pos == Direction.North,
+            '-' => pos == Direction.East || pos == Direction.West,
+            'L' => pos == Direction.East || pos == Direction.North,
+            'J' => pos == Direction.West || pos == Direction.North,
+            '7' => pos == Direction.West || pos == Direction.South,
+            'F' => pos == Direction.East || pos == Direction.South,
             _ => false,
         };
     }
 
     public int[] GetExit(int entryRow, int entryCol)
     {
-        Direction entranceDirection = GetRelativePosition(entryRow, entryCol);
+        Direction entranceDirection = PositionOf(entryRow, entryCol);
 
         if (Symbol == '|')
         {
@@ -240,7 +250,7 @@ public class Pipe
     /// <param name="entryCol"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    private Direction GetRelativePosition(int entryRow, int entryCol)
+    private Direction PositionOf(int entryRow, int entryCol)
     {
         if (entryRow == Row - 1)
         {

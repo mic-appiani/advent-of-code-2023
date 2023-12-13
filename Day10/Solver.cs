@@ -6,11 +6,12 @@ public class Solver
     private int _startRow = -1;
     private int _startCol = -1;
 
-    private List<List<char>> _map = new List<List<char>>();
+    private List<List<char>> _map = [];
+    private bool[,] _visited;
 
     public int Solve(int part)
     {
-        using var sr = new StreamReader("sample_1.txt");
+        using var sr = new StreamReader("sample_2.txt");
 
         var currentRow = -1;
         while (!sr.EndOfStream)
@@ -34,50 +35,55 @@ public class Solver
         }
 
         PrintMap();
-        Pipe pipe = FindEntryPipe(_startRow, _startCol);
-        Console.WriteLine();
-        // pick one direction and follow it
-        // start from S and detect connected cells
-        // assumption: is a continuous loop
-        // continue until S is hit
-        // divide steps by 2 (round up to next int)
+        _visited = new bool[_map.Count, _map[0].Count];
+        Pipe? nextPipe = FindConnection(_startRow, _startCol);
+        var steps = 0;
 
+        while (nextPipe is not null)
+        {
+            steps++;
+            _visited[nextPipe.Row, nextPipe.Col] = true;
+            // must track visited pipes
+            nextPipe = FindConnection(nextPipe.Row, nextPipe.Col);
+        }
+
+        _solution = (int)Math.Ceiling((double)steps / 2);
         return _solution;
     }
 
-    private Pipe FindEntryPipe(int startRow, int startCol)
+    private Pipe? FindConnection(int startRow, int startCol)
     {
         // for now let's ignore boundaries because i'm feeling lucky
         // check connections up
         var pipe = new Pipe(startRow - 1, startCol, _map);
 
-        if (pipe.CanConnectTo(startRow, startCol))
+        if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
         {
             return pipe;
         }
 
         pipe = new Pipe(startRow + 1, startCol, _map);
 
-        if (pipe.CanConnectTo(startRow, startCol))
+        if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
         {
             return pipe;
         }
 
         pipe = new Pipe(startRow, startCol - 1, _map);
 
-        if (pipe.CanConnectTo(startRow, startCol))
+        if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
         {
             return pipe;
         }
 
         pipe = new Pipe(startRow, startCol + 1, _map);
 
-        if (pipe.CanConnectTo(startRow, startCol))
+        if (pipe.CanConnectTo(startRow, startCol) && !_visited[pipe.Row, pipe.Col])
         {
             return pipe;
         }
 
-        throw new Exception("The location cannot connect to any surrounding pipe");
+        return null;
     }
 
     private void PrintMap()
@@ -110,7 +116,7 @@ public class Pipe
 
     public bool CanConnectTo(int row, int col)
     {
-        var direction = GetDirectionRelativeTo(row, col);
+        var direction = GetRelativePosition(row, col);
         return Symbol switch
         {
             '|' => direction == Direction.South || direction == Direction.North,
@@ -125,7 +131,7 @@ public class Pipe
 
     public int[] GetExit(int entryRow, int entryCol)
     {
-        Direction entranceDirection = GetDirectionRelativeTo(entryRow, entryCol);
+        Direction entranceDirection = GetRelativePosition(entryRow, entryCol);
 
         if (Symbol == '|')
         {
@@ -207,7 +213,7 @@ public class Pipe
     /// <param name="entryCol"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    private Direction GetDirectionRelativeTo(int entryRow, int entryCol)
+    private Direction GetRelativePosition(int entryRow, int entryCol)
     {
         if (entryRow == Row - 1)
         {
@@ -219,12 +225,12 @@ public class Pipe
             return Direction.South;
         }
 
-        if (entryCol == Row - 1)
+        if (entryCol == Col - 1)
         {
             return Direction.West;
         }
 
-        if (entryCol == Row + 1)
+        if (entryCol == Col + 1)
         {
             return Direction.East;
         }

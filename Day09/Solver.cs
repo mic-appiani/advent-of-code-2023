@@ -41,11 +41,21 @@
                 sequence = newSequence;
             }
 
-
-            _solution += sequences.Select(x => x.Last()).Sum();
-            // for each sequence, create a new sequence that is one smaller than the original sequence
-            // repeat until the sequence is all zeros
-            // sum the last element in each sequence including the original, this is the prediction
+            if (part == 1)
+            {
+                _solution += sequences.Select(x => x.Last()).Sum();
+            }
+            else if (part == 2)
+            {
+                var current = sequences.Last()[0];
+                
+                for (int i = sequences.Count - 2; i >= 0; i--)
+                {
+                    current = sequences[i][0] - current;
+                }
+                
+                _solution += current;
+            }
         }
 
         return _solution;

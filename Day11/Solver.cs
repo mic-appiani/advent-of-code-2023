@@ -36,17 +36,57 @@ public class Solver
             {
                 var emptyRow = Enumerable.Range(0, row.Length).Select(x => '.').ToList();
                 _map.Add(emptyRow);
+                rowNumber++;
             }
 
             rowNumber++;
         }
 
-        // scan the entire map for empty columns. if an empty column is detected, it must be doubled.
+        for (int col = 0; col < _map[0].Count; col++)
+        {
+            var isEmpty = true;
+            for (int row = 0; row < _map.Count; row++)
+            {
+                if (_map[row][col] == '#')
+                {
+                    isEmpty = false;
+                }
+            }
 
+            if (isEmpty)
+            {
+                InsertEmptyColumnLeft(col);
+                col++;
+            }
+        }
+
+        PrintMap();
+        
         // calculate the shortest distance between each pair of galaxies, with no duplicate pairs
         // 1-2 is the same as 2-1
 
         // the solution is the sum of all the distances
         return _solution;
+    }
+
+    private void PrintMap()
+    {
+        for (int row = 0; row < _map.Count; row++)
+        {
+            for (int col = 0; col < _map[0].Count; col++)
+            {
+                Console.Write(_map[row][col]);
+            }
+
+            Console.WriteLine();
+        }
+    }
+
+    private void InsertEmptyColumnLeft(int referenceColumn)
+    {
+        for (int row = 0; row < _map.Count; row++)
+        {
+            _map[row].Insert(referenceColumn, '.');
+        }
     }
 }

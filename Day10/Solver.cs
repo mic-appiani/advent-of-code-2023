@@ -1,4 +1,6 @@
-﻿namespace Day10;
+﻿using System.Xml.Schema;
+
+namespace Day10;
 
 public class Solver
 {
@@ -8,6 +10,7 @@ public class Solver
 
     private List<List<char>> _map = [];
     private bool[,] _visited;
+    private char[,] _boundaries;
 
     public int Solve(int part)
     {
@@ -42,14 +45,62 @@ public class Solver
         while (nextPipe != null && !_visited[nextPipe.Row, nextPipe.Col])
         {
             steps++;
-            Console.WriteLine(steps);
             _visited[nextPipe.Row, nextPipe.Col] = true;
             nextPipe = FindConnection(nextPipe);
         }
 
-        PrintMap();
-        _solution = (int)Math.Ceiling((double)(steps - 1) / 2);
-        return _solution;
+        if (part == 1)
+        {
+            PrintMapPipes();
+            _solution = (int)Math.Ceiling((double)(steps - 1) / 2);
+            return _solution;
+        }
+
+        // For part 2, i had to go look at hints.
+        // Pick's Theorem / shoelace formula and the "scanline" approach were suggested
+        // I'm trying the latter. Heavily explained on a reddit thread:
+        // https://www.reddit.com/r/adventofcode/comments/18f1sgh/2023_day_10_part_2_advise_on_part_2/
+        if (part == 2)
+        {
+            _boundaries = new char[_map.Count, _map[0].Count];
+
+            for (int row = 0; row < _map.Count; row++)
+            {
+                var inside = false;
+                for (int col = 0; col < _map[row].Count; col++)
+                {
+                    var tile = _map[row][col];
+                    char lastCorner = '?';
+
+                    if (_visited[row, col])
+                    {
+                        if ("|F7".Contains(tile))
+                        {
+                            inside = !inside;
+                        }
+
+                        _boundaries[row, col] = tile;
+                    }
+                    else
+                    {
+                        if (inside)
+                        {
+                            _boundaries[row, col] = 'I';
+                            _solution++;
+                        }
+                        else
+                        {
+                            _boundaries[row, col] = 'O';
+                        }
+                    }
+                }
+            }
+
+            PrintBoundaries();
+            return _solution;
+        }
+
+        return -1;
     }
 
 
@@ -114,7 +165,36 @@ public class Solver
                !_visited[destPipe.Row, destPipe.Col];
     }
 
-    private void PrintMap()
+    private void PrintBoundaries()
+    {
+        for (int row = 0; row < _map.Count; row++)
+        {
+            for (int col = 0; col < _map[row].Count; col++)
+            {
+
+                if (_visited[row, col])
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+                
+                var tile = _boundaries[row,col];
+                if (tile == 'I')
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+                else if (tile == 'O')
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                
+                Console.Write(_boundaries[row, col]);
+            }
+
+            Console.WriteLine();
+        }
+    }
+
+    private void PrintMapPipes()
     {
         for (int row = 0; row < _map.Count; row++)
         {

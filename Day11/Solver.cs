@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Day11;
 
@@ -7,6 +8,8 @@ public class Solver
     private long _solution;
     private List<List<char>> _map = [];
     private Dictionary<int, int[]> _galaxies = new();
+    private List<int> _emptyRows = [];
+    private List<int> _emptyCols = [];
 
     public long Solve(int part)
     {
@@ -15,26 +18,20 @@ public class Solver
         while (!sr.EndOfStream)
         {
             var row = sr.ReadLine();
-            // todo: for part 2, keep track of the empty row locations
-            // do not expand the map manualy, instead,
-            // when calculating, use a variable to add the extra space for each empty row/col
             var rowList = row!.ToList();
             _map.Add(rowList);
 
             if (rowList.All(c => c == '.'))
             {
-                _map.Add(rowList);
+                _emptyRows.Add(_map.Count - 1);
             }
-
         }
 
         HandleEmptyColumns();
 
-        // PrintMap();
         DetectGalaxies();
-        CalculateDistances();
+        CalculateDistances(part);
 
-        // the solution is the sum of all the distances
         return _solution;
     }
 
@@ -64,18 +61,18 @@ public class Solver
                 if (_map[row][col] == '#')
                 {
                     isEmpty = false;
+                    break;
                 }
             }
 
             if (isEmpty)
             {
-                InsertEmptyColumnLeft(col);
-                col++;
+                _emptyCols.Add(col);
             }
         }
     }
 
-    private void CalculateDistances()
+    private void CalculateDistances(int part)
     {
         var pairs = 0;
         for (int i = 1; i < _galaxies.Keys.Max(); i++)
@@ -85,36 +82,20 @@ public class Solver
                 var from = _galaxies[i];
                 var to = _galaxies[j];
 
+
                 var deltaY = Math.Abs(to[0] - from[0]);
                 var deltaX = Math.Abs(to[1] - from[1]);
 
-                var dist = deltaY + deltaX;
+                var emptyRows = _emptyRows.Count(x => from[0] < x && to[0] > x);
+                var emptyCols = _emptyCols.Count(x => (from[1] < x && to[1] > x) ||
+                                                      (to[1] < x && from[1] > x));
+                var emptySpaceMultiplier = part == 1 ? 1 : 999_999;
+                var dist = deltaY + deltaX + (emptyRows + emptyCols) * emptySpaceMultiplier;
                 pairs++;
                 _solution += dist;
             }
         }
 
         Console.WriteLine($"Pairs: {pairs}");
-    }
-
-    private void PrintMap()
-    {
-        for (int row = 0; row < _map.Count; row++)
-        {
-            for (int col = 0; col < _map[0].Count; col++)
-            {
-                Console.Write(_map[row][col]);
-            }
-
-            Console.WriteLine();
-        }
-    }
-
-    private void InsertEmptyColumnLeft(int referenceColumn)
-    {
-        for (int row = 0; row < _map.Count; row++)
-        {
-            _map[row].Insert(referenceColumn, '.');
-        }
     }
 }
